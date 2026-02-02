@@ -140,12 +140,10 @@ export async function POST(request: NextRequest) {
  * Health check and configuration status.
  */
 export async function GET() {
-  const configured = !!process.env.NEXUS_API_KEY;
   const webhookUrl =
     process.env.NEXUS_WEBHOOK_URL || "https://nexus.zar.app/webhooks/zar_surveys";
 
   return NextResponse.json({
-    configured,
     webhook_url: webhookUrl,
     usage: {
       single: "POST { interview_id: '1' }",

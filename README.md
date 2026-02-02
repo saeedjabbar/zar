@@ -80,59 +80,40 @@ Typography loaded via `next/font`: Crimson Text (serif headings), DM Sans (body)
 
 This project sends interview data to [Nexus](https://nexus.zar.app), ZAR's organizational knowledge distillation service. Nexus uses a **Universal Webhook Processor** that accepts any JSON payload and uses AI to extract meaningful content, storing it as a queryable semantic graph.
 
+No authentication required - the webhook endpoint accepts any JSON and the LLM figures out how to extract knowledge from it.
+
 ### How It Works
 
 ```mermaid
 sequenceDiagram
     participant App as ZAR Survey App
-    participant API as POST /api/nexus
-    participant Nexus as Nexus Webhook
+    participant Nexus as POST /webhooks/zar_surveys
     participant LLM as LLM Distillation
-    participant RDF as Oxigraph (RDF)
-    participant Vec as pgvector
+    participant RDF as Oxigraph + pgvector
 
-    App->>API: Send interview data
-    API->>Nexus: POST /webhooks/zar_surveys
+    App->>Nexus: POST interview JSON
     Nexus->>LLM: Extract insights, patterns, learnings
-    LLM-->>Nexus: Structured JSON
-    Nexus->>RDF: Store as semantic triples
-    Nexus->>Vec: Generate embeddings
-    Note over RDF,Vec: Knowledge becomes queryable
+    LLM-->>Nexus: Structured knowledge
+    Nexus->>RDF: Store as semantic triples + embeddings
+    Note over RDF: Knowledge becomes queryable
 ```
-
-### Setup
-
-1. **Get your API key** by running the device authorization flow:
-   ```bash
-   curl -X POST "https://nexus.zar.app/device/authorize"
-   ```
-   This opens your browser for GitHub OAuth. Once authorized, your token is saved locally.
-
-2. **Configure environment variables** in `.env.local`:
-   ```
-   NEXUS_API_KEY=your-api-key
-   NEXUS_WEBHOOK_URL=https://nexus.zar.app/webhooks/zar_surveys
-   ```
 
 ### Sending Interview Data
 
 ```bash
+npm run dev
+
+# Send all interviews to Nexus
+curl -X POST http://localhost:3000/api/nexus \
+  -H "Content-Type: application/json" \
+  -d '{"all": true}'
+
 # Send a single interview
 curl -X POST http://localhost:3000/api/nexus \
   -H "Content-Type: application/json" \
   -d '{"interview_id": "1"}'
 
-# Send all interviews (bulk)
-curl -X POST http://localhost:3000/api/nexus \
-  -H "Content-Type: application/json" \
-  -d '{"all": true}'
-
-# Send raw content
-curl -X POST http://localhost:3000/api/nexus \
-  -H "Content-Type: application/json" \
-  -d '{"content": "Your content here..."}'
-
-# Check configuration status
+# Check status
 curl http://localhost:3000/api/nexus
 ```
 

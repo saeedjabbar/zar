@@ -2,7 +2,6 @@ import "server-only";
 
 const NEXUS_WEBHOOK_URL =
   process.env.NEXUS_WEBHOOK_URL || "https://nexus.zar.app/webhooks/zar_surveys";
-const NEXUS_API_KEY = process.env.NEXUS_API_KEY;
 
 export interface NexusPayload {
   content: string;
@@ -23,17 +22,11 @@ export interface NexusResponse {
  * The webhook accepts any JSON payload and uses AI to extract meaningful content.
  */
 export async function sendToNexus(payload: NexusPayload): Promise<NexusResponse> {
-  if (!NEXUS_API_KEY) {
-    console.warn("NEXUS_API_KEY not configured - skipping Nexus integration");
-    return { success: false, error: "NEXUS_API_KEY not configured" };
-  }
-
   try {
     const response = await fetch(NEXUS_WEBHOOK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${NEXUS_API_KEY}`,
       },
       body: JSON.stringify({
         content: payload.content,
