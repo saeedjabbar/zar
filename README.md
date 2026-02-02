@@ -21,11 +21,11 @@ flowchart TB
     end
 
     subgraph Pages
-        HOME[/ Dashboard]
-        LIST[/interviews List]
-        DETAIL[/interviews/id Detail]
-        ANALYSIS[/analysis Report]
-        FOUNDERS[/founders Founder Dashboard]
+        HOME["/ Dashboard"]
+        LIST["/interviews List"]
+        DETAIL["/interviews/id Detail"]
+        ANALYSIS["/analysis Report"]
+        FOUNDERS["/founders Founder Dashboard"]
     end
 
     subgraph Components
