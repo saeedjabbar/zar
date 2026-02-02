@@ -1,0 +1,39 @@
+
+
+Interviewer: Hello, how are you?
+Shopkeeper: Hello, Alhamdulillah, I am fine. How are you?
+Interviewer: Alhamdulillah, I am also fine.
+Interviewer: How long have you been running this shop?
+Shopkeeper: Alhamdulillah, our shop was started around 2008. For me personally, it has been about three to four years. Earlier, my elder brother used to handle it.
+Interviewer: So earlier your brother mostly handled the shop, and now you manage it?
+Shopkeeper: Yes, now I manage it. Earlier, our uncles were also with us, but they passed away. Because of that, we prefer dealing in cash, as it is easier for us.
+Interviewer: Okay. How do customers pay you?
+Shopkeeper: Mostly in cash. JazzCash or EasyPaisa payments are not preferred.
+Interviewer: Why do you prefer cash?
+Shopkeeper: Because nowadays fraud is very common. Honest transactions are less, and fraud is more. That’s why we prefer cash, because it is easier and safer for us.
+Interviewer: If a customer does not have cash, do you accept JazzCash or EasyPaisa? For example, if I come to you and ask you to accept EasyPaisa, would you accept it?
+Shopkeeper: Most customers find it difficult. Also, EasyPaisa network is not very strong here. Sometimes, if a customer has difficulty, we tell them they can send through EasyPaisa and we accept it, but mostly we avoid it. Because, as you know, fraud cases are very common, so we don’t prefer EasyPaisa much.
+Interviewer: Which mobile payment services do you use? JazzCash or EasyPaisa?
+Shopkeeper: For payments, we have only recently started EasyPaisa. Earlier, we only worked with cash. Now, since most people have started using online systems, we also keep EasyPaisa. But earlier it was mostly cash.
+Interviewer: Before taking online payments, what were you afraid of? What kind of fear did you have?
+Shopkeeper: Mostly fraud. There was an incident with another shopkeeper as well. A customer came, took items, showed that payment was sent, but when the shopkeeper checked later, the payment had not gone through. These problems happen a lot. That’s why trust is low in online payments.
+Interviewer: So you don’t fully trust online payments?
+Shopkeeper: No, we don’t trust them fully. But if people request, we try to help. If the payment comes, then we accept it.
+Interviewer: Has any customer ever asked you for help in transferring money or paying bills online?
+Shopkeeper: Yes, many people come. Some want cash, some want to transfer money, some want to pay bills online. We help them when we can.
+Interviewer: Has any customer ever come to you with dollars and asked you to exchange them?
+Shopkeeper: No, such a customer has never come.
+Interviewer: If a customer comes with dollars and asks you to exchange them, what would you do?
+Shopkeeper: We don’t do that. There is no bank or exchange service here. If someone asks, we tell them to go to the center where banks are.
+Interviewer: So you don’t know any nearby currency exchange shops?
+Shopkeeper: Not nearby. In the center area, there are banks. Usually, people go there.
+Interviewer: If someone asks you where to exchange money, you would guide them to a bank?
+Shopkeeper: Yes, exactly. If someone is new or doesn’t know, we tell them to go to the bank at that place.
+Interviewer: What items did you keep when you first started the shop, and what new items have you added later? How did you grow your business?
+Shopkeeper: There are no very special new items. If we see something in the market and feel customers might like it, we keep it. If it sells, we continue. If customers don’t like it, we stop keeping it.
+Interviewer: Have you thought about expanding your business in the future?
+Shopkeeper: Yes, InshaAllah. Our main hope is that the shop continues and does not close. InshaAllah, we will grow in the future.
+Interviewer: How is the business situation these days?
+Shopkeeper: Everyone has problems these days. If you ask anyone, business is not enjoyable. For the last three to four months, work has been very slow. Compared to last year, things were better. Now, work is very slow, and because of that, people are not investing.
+Interviewer: Thank you very much for your time.
+Shopkeeper: Thank you very much. Allah Hafiz.

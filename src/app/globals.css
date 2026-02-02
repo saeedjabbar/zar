@@ -1,0 +1,222 @@
+@import "tailwindcss";
+
+:root {
+  /* Base palette - warm paper tones */
+  --background: #faf8f5;
+  --foreground: #1a1612;
+  --paper: #fffdf9;
+  --paper-warm: #f5f0e8;
+  --ink: #2d2620;
+  --ink-light: #5c534a;
+  --ink-muted: #8a8279;
+
+  /* Accent colors - field research inspired */
+  --accent-rust: #b85c38;
+  --accent-rust-light: #d4886a;
+  --accent-terra: #c67c4e;
+  --accent-sage: #5e7a65;
+  --accent-sage-light: #8fa996;
+  --accent-ochre: #c4a35a;
+  --accent-slate: #4a5568;
+
+  /* Status colors */
+  --status-alert: #c53030;
+  --status-alert-bg: #fff5f5;
+  --status-warning: #c05621;
+  --status-warning-bg: #fffaf0;
+  --status-info: #2b6cb0;
+  --status-info-bg: #ebf8ff;
+  --status-success: #276749;
+  --status-success-bg: #f0fff4;
+
+  /* Typography - font families provided by next/font in layout.tsx */
+
+  /* Shadows */
+  --shadow-paper: 0 1px 3px rgba(45, 38, 32, 0.06), 0 4px 12px rgba(45, 38, 32, 0.04);
+  --shadow-card: 0 2px 8px rgba(45, 38, 32, 0.08), 0 8px 24px rgba(45, 38, 32, 0.06);
+  --shadow-lifted: 0 4px 16px rgba(45, 38, 32, 0.12), 0 12px 32px rgba(45, 38, 32, 0.08);
+
+  /* Borders */
+  --border-light: rgba(45, 38, 32, 0.08);
+  --border-medium: rgba(45, 38, 32, 0.12);
+  --border-strong: rgba(45, 38, 32, 0.2);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #141210;
+    --foreground: #f5f0e8;
+    --paper: #1e1b18;
+    --paper-warm: #252220;
+    --ink: #f5f0e8;
+    --ink-light: #c4bdb4;
+    --ink-muted: #8a8279;
+
+    --shadow-paper: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.2);
+    --shadow-lifted: 0 4px 16px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.25);
+
+    --border-light: rgba(255, 253, 249, 0.06);
+    --border-medium: rgba(255, 253, 249, 0.1);
+    --border-strong: rgba(255, 253, 249, 0.15);
+  }
+}
+
+/* Base styles */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Noise texture overlay */
+.noise-texture {
+  position: relative;
+}
+
+.noise-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--paper-warm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--ink-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-light);
+}
+
+/* Animation utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.4s ease-out forwards;
+}
+
+/* Stagger delays for lists */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* Typography utilities */
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Paper effect card */
+.paper-card {
+  background: var(--paper);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-paper);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.paper-card:hover {
+  box-shadow: var(--shadow-card);
+  transform: translateY(-1px);
+}
+
+/* Field note styling */
+.field-note {
+  position: relative;
+  background:
+    linear-gradient(var(--paper) 28px, var(--border-light) 28px, var(--border-light) 29px, var(--paper) 29px);
+  background-size: 100% 29px;
+  padding: 1.5rem;
+  line-height: 29px;
+}
+
+/* Highlight marker effect */
+.highlight-marker {
+  background: linear-gradient(180deg, transparent 60%, var(--accent-ochre) 60%, var(--accent-ochre) 90%, transparent 90%);
+  padding: 0 4px;
+  margin: 0 -4px;
+}
+
+/* Focus ring */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--accent-rust);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent-ochre);
+  color: var(--ink);
+}
