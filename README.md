@@ -16,6 +16,8 @@ flowchart TB
     subgraph Data Layer
         MD[src/data/data.md<br/>Markdown Table]
         LIB[src/lib/interviews.ts<br/>Parser + Cache]
+        TR[transcripts/*.txt<br/>Raw transcripts]
+        FL[src/lib/founder-insights.ts<br/>Founder metrics + evidence]
     end
 
     subgraph Pages
@@ -23,6 +25,7 @@ flowchart TB
         LIST[/interviews List]
         DETAIL[/interviews/id Detail]
         ANALYSIS[/analysis Report]
+        FOUNDERS[/founders Founder Dashboard]
     end
 
     subgraph Components
@@ -36,6 +39,9 @@ flowchart TB
     LIB -->|getInterviews| LIST
     LIB -->|getInterviewById| DETAIL
     LIB -->|getInterviews| ANALYSIS
+    MD -->|read at build| FL
+    TR -->|read at build| FL
+    FL -->|getFounderDashboardData| FOUNDERS
 
     HOME --> DASH
     LIST --> INT
@@ -55,7 +61,7 @@ flowchart LR
     E -->|render| F[Pages]
 ```
 
-The single source of truth is `src/data/data.md`, a markdown table containing all interview data. The `src/lib/interviews.ts` module parses this file server-side using Node's `fs` module and caches results with React's `cache()` function.
+The single source of truth is `src/data/data.md`, a markdown table containing all interview data. The `src/lib/interviews.ts` module parses this file server-side using Node's `fs` module and caches results with React's `cache()` function. The founder dashboard also reads raw interview transcripts from `transcripts/*.txt` via `src/lib/transcripts.ts`.
 
 ### Design System
 
