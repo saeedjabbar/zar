@@ -98,12 +98,19 @@ sequenceDiagram
     Note over RDF: Knowledge becomes queryable
 ```
 
-### Sending Interview Data
+### Auto-Sync on Startup
+
+New interviews are automatically synced to Nexus when the app starts. The sync tracks which interviews have already been sent (in `.nexus-sync-state.json`) to avoid redundant requests.
 
 ```bash
 npm run dev
+# Console: "Nexus sync: 3 new, 10 existing"
+```
 
-# Send all interviews to Nexus
+### Manual Sync
+
+```bash
+# Force sync all interviews (ignores local state, Nexus deduplicates)
 curl -X POST http://localhost:3000/api/nexus \
   -H "Content-Type: application/json" \
   -d '{"all": true}'
@@ -112,9 +119,6 @@ curl -X POST http://localhost:3000/api/nexus \
 curl -X POST http://localhost:3000/api/nexus \
   -H "Content-Type: application/json" \
   -d '{"interview_id": "1"}'
-
-# Check status
-curl http://localhost:3000/api/nexus
 ```
 
 ### What Gets Captured
