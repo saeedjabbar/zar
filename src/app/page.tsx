@@ -1,30 +1,36 @@
 import Link from "next/link";
 
+import { StatCard } from "@/components/dashboard";
 import {
-  StatCard,
-  PaymentMethodsChart,
-  ShopTypeChart,
-  KeyFindingsCard,
-} from "@/components/dashboard";
+  ValidationScorecard,
+  ConversionFunnel,
+  WillingnessFactors,
+  BarListCard,
+  PilotCandidatesTable,
+  SegmentsCard,
+  EvidenceExplorer,
+} from "@/components/founders";
+import {
+  getFounderDashboardData,
+  computeValidationScorecard,
+  computeConversionFunnel,
+  extractWillingnessFactors,
+  computeEnhancedPilotCandidates,
+} from "@/lib/founder-insights";
 import { getInterviews } from "@/lib/interviews";
 
-const COLORS = [
-  "#22c55e",
-  "#3b82f6",
-  "#f59e0b",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ec4899",
-  "#f97316",
-  "#6b7280",
-];
-
-function formatPercent(value: number, total: number) {
-  if (total <= 0) return "0%";
-  return `${Math.round((value / total) * 100)}%`;
-}
-
 // Icons for stat cards
+const FxIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
 const UsersIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path
@@ -36,108 +42,82 @@ const UsersIcon = () => (
   </svg>
 );
 
-const CashIcon = () => (
+const AlertIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
     />
   </svg>
 );
 
-const TrendingUpIcon = () => (
+const RocketIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={2}
-      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-    />
-  </svg>
-);
-
-const CurrencyIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      d="M13 10V3L4 14h7v7l9-11h-7z"
     />
   </svg>
 );
 
 export default function Home() {
+  const data = getFounderDashboardData();
   const interviews = getInterviews();
 
-  const totalResponses = interviews.length;
-  const fraudStories = interviews.filter((i) => i.fraudStory).length;
-  const helpRequests = interviews.filter((i) => i.customerAskedForHelp).length;
-  const dollarInquiries = interviews.filter((i) => i.dollarInquiry).length;
+  // Compute validation scorecard
+  const scorecard = computeValidationScorecard(
+    data.totalInterviews,
+    data.fxInquiryCount,
+    data.segments,
+    data.whyNotHandleFxBuckets,
+    data.fraudStoryCount,
+    data.pilotCandidates.length
+  );
 
-  const shopTypeCounts = interviews.reduce<Record<string, number>>((acc, i) => {
-    const key = i.shopType || "Unknown";
-    acc[key] = (acc[key] ?? 0) + 1;
-    return acc;
-  }, {});
+  // Compute conversion funnel
+  const funnel = computeConversionFunnel(
+    interviews.map((i) => ({
+      id: i.id,
+      dollarInquiry: i.dollarInquiry,
+      customerAskedForHelp: i.customerAskedForHelp,
+      fraudStory: i.fraudStory,
+      paymentMethods: i.paymentMethods,
+    }))
+  );
 
-  const shopTypeData = Object.entries(shopTypeCounts)
-    .map(([name, count]) => ({ name, count }))
-    .sort((a, b) => b.count - a.count);
+  // Compute willingness factors
+  const willingnessFactors = extractWillingnessFactors(
+    interviews.map((i) => ({
+      id: i.id,
+      trustFactors: i.trustFactors || "",
+      transcript: i.transcript || "",
+    }))
+  );
 
-  const paymentCounts = interviews.reduce<Record<string, number>>((acc, i) => {
-    i.paymentMethods.forEach((method) => {
-      const key = method || "Unknown";
-      acc[key] = (acc[key] ?? 0) + 1;
-    });
-    return acc;
-  }, {});
+  // Compute enhanced pilot candidates
+  const enhancedCandidates = computeEnhancedPilotCandidates(
+    interviews.map((i) => ({
+      id: i.id,
+      shopType: i.shopType,
+      location: i.location,
+      ownerAge: i.ownerAge,
+      customersPerDay: i.customersPerDay,
+      dollarInquiry: i.dollarInquiry,
+      customerAskedForHelp: i.customerAskedForHelp,
+      paymentMethods: i.paymentMethods,
+      fraudStory: i.fraudStory,
+      concernsBeforeStarting: i.concernsBeforeStarting || "",
+      currentProblems: i.currentProblems || "",
+      currencyExchangeReferral: i.currencyExchangeReferral,
+    }))
+  );
 
-  const paymentSorted = Object.entries(paymentCounts).sort((a, b) => b[1] - a[1]);
-  const topPayments = paymentSorted.slice(0, 7);
-  const otherPayments = paymentSorted.slice(7).reduce((sum, [, v]) => sum + v, 0);
-
-  const paymentData = [
-    ...topPayments.map(([name, value], idx) => ({
-      name,
-      value,
-      color: COLORS[idx % COLORS.length],
-    })),
-    ...(otherPayments > 0
-      ? [{ name: "Other", value: otherPayments, color: COLORS[COLORS.length - 1] }]
-      : []),
-  ];
-
-  const topShopType = shopTypeData[0];
-  const topPayment = paymentSorted[0];
-
-  const keyFindings = [
-    `Total interviews: ${totalResponses}.`,
-    topShopType
-      ? `Most common shop type: ${topShopType.name} (${topShopType.count}, ${formatPercent(topShopType.count, totalResponses)}).`
-      : "No shop type data available.",
-    topPayment
-      ? `Most-mentioned accepted payment method: ${topPayment[0]} (${topPayment[1]} mentions).`
-      : "No payment method data available.",
-    `${fraudStories} of ${totalResponses} mentioned a real fraud story.`,
-    `${helpRequests} of ${totalResponses} reported customers asking for help sending/receiving money.`,
-    `${dollarInquiries} of ${totalResponses} reported customer questions about dollars/foreign money.`,
-  ];
-
-  const lastUpdated = (() => {
-    const dates = interviews
-      .map((i) => new Date(i.timestamp))
-      .filter((d) => !Number.isNaN(d.getTime()))
-      .sort((a, b) => b.getTime() - a.getTime());
-
-    return dates[0]?.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-    });
-  })();
+  // Find pilot-ready count from funnel
+  const pilotReadyCount = funnel.find((s) => s.name === "Pilot Ready")?.count ?? 0;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--background)" }}>
@@ -220,42 +200,24 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
           <div className="animate-fade-in-up">
             {/* Eyebrow badge */}
-            <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium tracking-wide uppercase mb-6"
-              style={{
-                background: "var(--paper)",
-                color: "var(--ink-muted)",
-                border: "1px solid var(--border-medium)",
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: "var(--accent-sage)" }}
-              />
-              Research Dashboard
-            </div>
+
 
             {/* Title */}
             <h1
               className="font-serif text-4xl md:text-5xl font-bold tracking-tight mb-4"
               style={{ color: "var(--ink)" }}
             >
-              ZAR Interview Dashboard
+              Interview Dashboard
             </h1>
             <p
               className="text-lg md:text-xl max-w-2xl leading-relaxed"
               style={{ color: "var(--ink-light)" }}
             >
-              Summary views computed directly from{" "}
-              <code
-                className="font-mono text-sm px-1.5 py-0.5 rounded"
-                style={{
-                  background: "var(--paper)",
-                  color: "var(--ink-light)",
-                }}
-              >
-                src/data/data.md
-              </code>
+              Validating merchants as FX agents for{" "}
+              <span className="font-semibold" style={{ color: "var(--ink)" }}>
+                USD ↔ PKR
+              </span>{" "}
+              exchange. Data from {data.totalInterviews} interviews in Islamabad, Pakistan.
             </p>
           </div>
         </div>
@@ -271,153 +233,265 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Grid */}
-        <section className="mb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Section 1: Validation Scorecard */}
+        <section>
           <h2
             className="font-serif text-xl font-semibold mb-4"
             style={{ color: "var(--ink)" }}
           >
-            Key Metrics
+            The Verdict
+          </h2>
+          <ValidationScorecard scorecard={scorecard} />
+        </section>
+
+        {/* Section 2: Key Metrics */}
+        <section>
+          <h2
+            className="font-serif text-xl font-semibold mb-4"
+            style={{ color: "var(--ink)" }}
+          >
+            Key Signals
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
-              label="Total Interviews"
-              value={String(totalResponses)}
+              label="FX Demand"
+              value={`${data.fxInquiryCount}/${data.totalInterviews}`}
+              icon={<FxIcon />}
+            />
+            <StatCard
+              label="Help Requests"
+              value={`${data.helpRequestCount}/${data.totalInterviews}`}
               icon={<UsersIcon />}
             />
             <StatCard
               label="Fraud Stories"
-              value={String(fraudStories)}
-              icon={<CashIcon />}
+              value={String(data.fraudStoryCount)}
+              icon={<AlertIcon />}
             />
             <StatCard
-              label="Help Requests"
-              value={String(helpRequests)}
-              icon={<TrendingUpIcon />}
-            />
-            <StatCard
-              label="Dollar Inquiries"
-              value={String(dollarInquiries)}
-              icon={<CurrencyIcon />}
+              label="Pilot Ready"
+              value={String(pilotReadyCount)}
+              icon={<RocketIcon />}
             />
           </div>
         </section>
 
-        {/* Charts Section */}
-        <section className="mb-8">
+        {/* Section 3: Conversion Funnel */}
+        <section>
+          <ConversionFunnel stages={funnel} />
+        </section>
+
+        {/* Section 4: Pilot Segments + Willingness Factors */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SegmentsCard segments={data.segments} />
+          <WillingnessFactors factors={willingnessFactors} />
+        </section>
+
+        {/* Section 5: Risk Analysis */}
+        <section>
           <h2
             className="font-serif text-xl font-semibold mb-4"
             style={{ color: "var(--ink)" }}
           >
-            Distribution Analysis
+            Risk Analysis
           </h2>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PaymentMethodsChart
-              data={paymentData}
-              title="Accepted Payment Methods (mentions)"
+            <BarListCard
+              title="Why Merchants Don't Handle FX"
+              subtitle="Self-reported barriers to becoming an exchange agent"
+              data={data.whyNotHandleFxBuckets}
             />
-            <ShopTypeChart data={shopTypeData} />
-          </div>
-        </section>
-
-        {/* Key Findings Section */}
-        <section className="mb-8">
-          <h2
-            className="font-serif text-xl font-semibold mb-4"
-            style={{ color: "var(--ink)" }}
-          >
-            Insights & Recommendations
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <KeyFindingsCard
-              title="Key Findings"
-              findings={keyFindings.slice(0, 3)}
-            />
-            <KeyFindingsCard
-              title="Notable Trends"
-              findings={keyFindings.slice(3)}
+            <BarListCard
+              title="Fraud & Reliability Patterns"
+              subtitle="Trust barriers mentioned in interviews"
+              data={data.fraudPatternBuckets}
             />
           </div>
         </section>
 
-        {/* Browse Interviews Section */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <h2
-              className="font-serif text-xl font-semibold"
-              style={{ color: "var(--ink)" }}
-            >
-              Browse Interviews
-            </h2>
-            <Link
-              href="/interviews"
-              className="group inline-flex items-center gap-2 text-sm font-medium transition-colors"
-              style={{ color: "var(--accent-terra)" }}
-            >
-              <span className="group-hover:underline">View all</span>
-              <svg
-                className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </Link>
-          </div>
+        {/* Section 6: Pilot Candidates */}
+        <section>
+          <PilotCandidatesTable candidates={enhancedCandidates} />
+        </section>
+
+        {/* Section 7: Opportunities & Risks */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div
-            className="rounded-xl divide-y"
+            className="rounded-xl p-6"
             style={{
               background: "var(--paper)",
               border: "1px solid var(--border-light)",
               boxShadow: "var(--shadow-paper)",
             }}
           >
-            {interviews.slice(0, 10).map((interview) => (
-              <Link
-                key={interview.id}
-                href={`/interviews/${interview.id}`}
-                className="block px-6 py-4 transition-colors hover:bg-[var(--paper-warm)]"
-                style={{ borderColor: "var(--border-light)" }}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p
-                      className="font-semibold"
-                      style={{ color: "var(--ink)" }}
-                    >
-                      Interview #{interview.id} — {interview.shopType || "Unknown"}
-                    </p>
-                    <p
-                      className="text-sm mt-1"
-                      style={{ color: "var(--ink-light)" }}
-                    >
-                      {interview.location || "Unknown location"} • {interview.dateOfInterview} •{" "}
-                      {interview.timeOfInterview}
-                    </p>
-                  </div>
+            <h3
+              className="font-serif text-lg font-semibold mb-4"
+              style={{ color: "var(--ink)" }}
+            >
+              Top Opportunities
+            </h3>
+            <ul className="space-y-3">
+              {data.topOpportunities.map((opp, idx) => (
+                <li key={idx} className="flex gap-3">
                   <span
-                    className="text-sm"
-                    style={{ color: "var(--ink-muted)" }}
+                    className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{
+                      background: "var(--status-success)20",
+                      color: "var(--status-success)",
+                    }}
                   >
-                    {interview.interviewer}
+                    {idx + 1}
                   </span>
+                  <span className="text-sm" style={{ color: "var(--ink-light)" }}>
+                    {opp}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div
+            className="rounded-xl p-6"
+            style={{
+              background: "var(--paper)",
+              border: "1px solid var(--border-light)",
+              boxShadow: "var(--shadow-paper)",
+            }}
+          >
+            <h3
+              className="font-serif text-lg font-semibold mb-4"
+              style={{ color: "var(--ink)" }}
+            >
+              Key Risks
+            </h3>
+            <ul className="space-y-3">
+              {data.keyRisks.map((risk, idx) => (
+                <li key={idx} className="flex gap-3">
+                  <span
+                    className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{
+                      background: "var(--status-alert)20",
+                      color: "var(--status-alert)",
+                    }}
+                  >
+                    !
+                  </span>
+                  <span className="text-sm" style={{ color: "var(--ink-light)" }}>
+                    {risk}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Section 8: Recommended Experiments */}
+        <section
+          className="rounded-xl p-6"
+          style={{
+            background: "var(--paper)",
+            border: "1px solid var(--border-light)",
+            boxShadow: "var(--shadow-paper)",
+          }}
+        >
+          <h3
+            className="font-serif text-lg font-semibold mb-4"
+            style={{ color: "var(--ink)" }}
+          >
+            Recommended Experiments
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {data.recommendedExperiments.map((exp, idx) => (
+              <div
+                key={idx}
+                className="rounded-lg p-4"
+                style={{
+                  background: "var(--paper-warm)",
+                  border: "1px solid var(--border-light)",
+                }}
+              >
+                <div
+                  className="text-xs uppercase tracking-wide font-semibold mb-2"
+                  style={{ color: "var(--accent-terra)" }}
+                >
+                  Experiment {idx + 1}
                 </div>
-              </Link>
+                <h4
+                  className="font-semibold mb-2"
+                  style={{ color: "var(--ink)" }}
+                >
+                  {exp.title}
+                </h4>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <span
+                      className="font-medium"
+                      style={{ color: "var(--ink-muted)" }}
+                    >
+                      Success Metric:
+                    </span>
+                    <p style={{ color: "var(--ink-light)" }}>{exp.successMetric}</p>
+                  </div>
+                  <div>
+                    <span
+                      className="font-medium"
+                      style={{ color: "var(--ink-muted)" }}
+                    >
+                      Why Now:
+                    </span>
+                    <p style={{ color: "var(--ink-light)" }}>{exp.whyNow}</p>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </section>
+
+        {/* Section 9: Evidence Explorer */}
+        <section>
+          <h2
+            className="font-serif text-xl font-semibold mb-4"
+            style={{ color: "var(--ink)" }}
+          >
+            Evidence Explorer
+          </h2>
+          <EvidenceExplorer quotes={data.evidenceQuotes} />
+        </section>
+
+        {/* Data Quality Notes */}
+        {data.dataQualityNotes.length > 0 && (
+          <section
+            className="rounded-xl p-4"
+            style={{
+              background: "var(--paper-warm)",
+              border: "1px solid var(--border-light)",
+            }}
+          >
+            <h4
+              className="text-sm font-semibold mb-2"
+              style={{ color: "var(--ink-muted)" }}
+            >
+              Data Quality Notes
+            </h4>
+            <ul className="space-y-1">
+              {data.dataQualityNotes.map((note, idx) => (
+                <li
+                  key={idx}
+                  className="text-xs"
+                  style={{ color: "var(--ink-muted)" }}
+                >
+                  • {note}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
 
       {/* Footer */}
       <footer
-        className="border-t py-8"
+        className="border-t py-8 mt-8"
         style={{
           borderColor: "var(--border-light)",
           background: "var(--paper-warm)",
@@ -429,9 +503,20 @@ export default function Home() {
             style={{ color: "var(--ink-muted)" }}
           >
             <p>
-              Data last updated: {lastUpdated || "Unknown"}
+              Based on {data.totalInterviews} interviews • All amounts in USD (~$1 = 280 PKR) and PKR
             </p>
-            <p className="font-serif italic">ZAR Retail Payment Survey</p>
+            <p className="font-serif italic">
+              <a
+                href="https://zar.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline"
+                style={{ color: "var(--accent-terra)" }}
+              >
+                ZAR
+              </a>
+              {" "}Lean Startup Validation
+            </p>
           </div>
         </div>
       </footer>

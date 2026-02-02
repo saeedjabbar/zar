@@ -397,26 +397,48 @@ export default function AnalysisPage() {
               </svg>
               <span className="group-hover:underline">Dashboard</span>
             </Link>
-            <Link
-              href="/interviews"
-              className="group inline-flex items-center gap-2 text-sm font-medium transition-colors"
-              style={{ color: "var(--ink-light)" }}
-            >
-              <span className="group-hover:underline">Interviews</span>
-              <svg
-                className="w-4 h-4 transition-transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <div className="flex items-center gap-4">
+              <Link
+                href="/interviews"
+                className="group inline-flex items-center gap-2 text-sm font-medium transition-colors"
+                style={{ color: "var(--ink-light)" }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
-                />
-              </svg>
-            </Link>
+                <span className="group-hover:underline">Interviews</span>
+                <svg
+                  className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </Link>
+              <Link
+                href="/founders"
+                className="group inline-flex items-center gap-2 text-sm font-medium transition-colors"
+                style={{ color: "var(--ink-light)" }}
+              >
+                <span className="group-hover:underline">Founder Dashboard</span>
+                <svg
+                  className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
