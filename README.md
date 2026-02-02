@@ -1,6 +1,6 @@
 # ZAR Retail Payment Survey
 
-A Next.js application for exploring field research data from retail payment method interviews conducted across South Africa. Built with the "Field Notes" editorial design aesthetic.
+A Next.js application for exploring field research data from retail payment method interviews conducted across Pakistan. Built with the "Field Notes" editorial design aesthetic.
 
 ## Quick Start
 
@@ -78,22 +78,22 @@ Typography loaded via `next/font`: Crimson Text (serif headings), DM Sans (body)
 
 ## Nexus Integration
 
-This project integrates with [Nexus](https://nexus.zar.app), ZAR's organizational knowledge distillation service. Nexus captures Claude Code session transcripts, Slack threads, GitHub PR discussions, and other knowledge sources, distilling them into a queryable semantic graph.
+This project sends interview data to [Nexus](https://nexus.zar.app), ZAR's organizational knowledge distillation service. Nexus uses a **Universal Webhook Processor** that accepts any JSON payload and uses AI to extract meaningful content, storing it as a queryable semantic graph.
 
 ### How It Works
 
 ```mermaid
 sequenceDiagram
-    participant CC as Claude Code
-    participant Hook as Stop Hook
-    participant Nexus as Nexus API
+    participant App as ZAR Survey App
+    participant API as POST /api/nexus
+    participant Nexus as Nexus Webhook
     participant LLM as LLM Distillation
     participant RDF as Oxigraph (RDF)
     participant Vec as pgvector
 
-    CC->>Hook: Session ends
-    Hook->>Nexus: POST /transcripts/ingest
-    Nexus->>LLM: Extract decisions, learnings, participants
+    App->>API: Send interview data
+    API->>Nexus: POST /webhooks/zar_surveys
+    Nexus->>LLM: Extract insights, patterns, learnings
     LLM-->>Nexus: Structured JSON
     Nexus->>RDF: Store as semantic triples
     Nexus->>Vec: Generate embeddings
@@ -102,60 +102,50 @@ sequenceDiagram
 
 ### Setup
 
-1. **Configure the Claude Code hook** (runs automatically when sessions end):
-
-   Create `~/.claude/hooks/stop.sh`:
+1. **Get your API key** by running the device authorization flow:
    ```bash
-   #!/bin/bash
-   TRANSCRIPT=$(cat "$CLAUDE_TRANSCRIPT_FILE")
-   SESSION_ID="$CLAUDE_SESSION_ID"
+   curl -X POST "https://nexus.zar.app/device/authorize"
+   ```
+   This opens your browser for GitHub OAuth. Once authorized, your token is saved locally.
 
-   curl -X POST "$NEXUS_URL/transcripts/ingest" \
-     -H "Authorization: Bearer $NEXUS_API_KEY" \
-     -H "Content-Type: application/json" \
-     -d "{
-       \"content\": $(echo "$TRANSCRIPT" | jq -Rs .),
-       \"source\": \"claude_code\",
-       \"session_id\": \"$SESSION_ID\",
-       \"project\": \"zar\"
-     }"
+2. **Configure environment variables** in `.env.local`:
+   ```
+   NEXUS_API_KEY=your-api-key
+   NEXUS_WEBHOOK_URL=https://nexus.zar.app/webhooks/zar_surveys
    ```
 
-2. **Authenticate** (first time only):
-   ```bash
-   # Opens browser for GitHub OAuth
-   curl -X POST "$NEXUS_URL/device/authorize"
-   ```
+### Sending Interview Data
 
-3. **Configure MCP server** in your Claude Code settings to query Nexus during sessions:
-   ```json
-   {
-     "mcpServers": {
-       "nexus": {
-         "url": "https://nexus.zar.app/mcp"
-       }
-     }
-   }
-   ```
+```bash
+# Send a single interview
+curl -X POST http://localhost:3000/api/nexus \
+  -H "Content-Type: application/json" \
+  -d '{"interview_id": "1"}'
 
-### Querying Knowledge
+# Send all interviews (bulk)
+curl -X POST http://localhost:3000/api/nexus \
+  -H "Content-Type: application/json" \
+  -d '{"all": true}'
 
-With the MCP server configured, Claude Code can query organizational memory:
+# Send raw content
+curl -X POST http://localhost:3000/api/nexus \
+  -H "Content-Type: application/json" \
+  -d '{"content": "Your content here..."}'
 
-- `nexus_ontology()` - Explore available entity types
-- `nexus_recent(type: "Decision")` - Recent architectural decisions
-- `nexus_search("authentication")` - Semantic similarity search
-- `nexus_query("SELECT ?d WHERE { ?d a nx:Decision }")` - SPARQL queries
+# Check configuration status
+curl http://localhost:3000/api/nexus
+```
 
 ### What Gets Captured
 
-Every Claude Code session on this project automatically captures:
-- **Decisions**: Architectural choices with rationale
-- **Learnings**: Insights and lessons discovered
-- **Participants**: People and AI agents involved
-- **Topics**: Concepts and technologies discussed
+The Universal Webhook Processor extracts from interview transcripts:
+- Fraud incidents and patterns
+- Payment method adoption insights
+- Trust factors and concerns
+- Currency exchange behaviors
+- Key phrases about money and trust
 
-This enables queries like "What decisions have we made about the payment data model?" or "Show me learnings related to the transcript parser."
+This enables queries like "What fraud patterns have shopkeepers reported?" or "What concerns do merchants have about mobile payments?"
 
 ## Commands
 

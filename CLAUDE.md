@@ -12,7 +12,7 @@ npm run lint     # Run ESLint
 
 ## Architecture
 
-This is a Next.js 16 app (React 19, Tailwind CSS v4) displaying retail payment survey interview data from South Africa.
+This is a Next.js 16 app (React 19, Tailwind CSS v4) displaying retail payment survey interview data from Pakistan.
 
 ### Data Flow
 

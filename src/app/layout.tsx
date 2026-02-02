@@ -23,7 +23,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "ZAR Retail Payment Survey",
-  description: "Field research documentation for retail payment methods in South Africa",
+  description: "Field research documentation for retail payment methods in Pakistan",
 };
 
 export default function RootLayout({
