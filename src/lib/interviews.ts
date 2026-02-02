@@ -1,13 +1,10 @@
 import "server-only";
 
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import { cache } from "react";
 import type { Interview } from "@/types";
+import { dataMd } from "@/data/data";
 
 type TableRow = Record<string, string>;
-
-const DATA_MD_PATH = path.join(process.cwd(), "src", "data", "data.md");
 
 function splitMarkdownRow(line: string): string[] {
   const trimmed = line.trim();
@@ -79,8 +76,7 @@ function parseOwnerAge(value: string): number {
 }
 
 export const getInterviews = cache((): Interview[] => {
-  const md = readFileSync(DATA_MD_PATH, "utf-8");
-  const { rows } = parseMarkdownTable(md);
+  const { rows } = parseMarkdownTable(dataMd);
 
   return rows.map((row, index) => {
     const timestamp = row["Timestamp"]?.trim() ?? "";
