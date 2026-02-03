@@ -1,11 +1,15 @@
 import "server-only";
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { getInterviews } from "./interviews";
 import { sendToNexus, formatInterviewForNexus } from "./nexus";
 
-const SYNC_STATE_PATH = path.join(process.cwd(), ".nexus-sync-state.json");
+// Use /tmp on serverless (Vercel), project root locally
+const SYNC_STATE_PATH = process.env.VERCEL
+  ? path.join(tmpdir(), ".nexus-sync-state.json")
+  : path.join(process.cwd(), ".nexus-sync-state.json");
 
 interface SyncState {
   lastSyncedIds: string[];
@@ -13,10 +17,10 @@ interface SyncState {
 }
 
 function loadSyncState(): SyncState {
-  if (!existsSync(SYNC_STATE_PATH)) {
-    return { lastSyncedIds: [], lastSyncTime: "" };
-  }
   try {
+    if (!existsSync(SYNC_STATE_PATH)) {
+      return { lastSyncedIds: [], lastSyncTime: "" };
+    }
     return JSON.parse(readFileSync(SYNC_STATE_PATH, "utf-8"));
   } catch {
     return { lastSyncedIds: [], lastSyncTime: "" };
@@ -24,7 +28,12 @@ function loadSyncState(): SyncState {
 }
 
 function saveSyncState(state: SyncState): void {
-  writeFileSync(SYNC_STATE_PATH, JSON.stringify(state, null, 2));
+  try {
+    writeFileSync(SYNC_STATE_PATH, JSON.stringify(state, null, 2));
+  } catch (error) {
+    // Silently fail on read-only filesystems (serverless environments)
+    console.warn("Could not persist sync state:", (error as Error).message);
+  }
 }
 
 /**
